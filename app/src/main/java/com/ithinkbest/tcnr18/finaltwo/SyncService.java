@@ -1,7 +1,10 @@
 package com.ithinkbest.tcnr18.finaltwo;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
@@ -46,6 +49,20 @@ public class SyncService extends IntentService {
         updateSQLite(raw);
         Log.d(LOG_TAG, "...*** GOING TO INFORM UI TO POPULATE SPINNER");
 
+        //
+        Intent alarmIntent = new Intent(this, MainActivity.PopulateSpinnerReceiver.class);
+        PendingIntent pi = PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_ONE_SHOT);//getBroadcast(context, 0, i, 0);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        //Set the AlarmManager to wake up the system.
+           alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 100, pi);
+//        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME
+//                ,0
+//                ,15000
+//                ,pi);
+
+//        return true;
 
     }
     private String fetchCloudData() {
