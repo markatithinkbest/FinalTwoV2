@@ -24,6 +24,7 @@ import java.net.URL;
 //}
 public class MyService extends IntentService {
     public final static String LOG_TAG = "markchen987";
+    static String oldRaw="";
     public MyService() {
         super("MyService");
     }
@@ -31,10 +32,24 @@ public class MyService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(LOG_TAG,"... GOING TO FETCH DATA   ***********************************");
-        fetchCloudData();
+        String raw=fetchCloudData();
+        if (raw.equals(oldRaw)){
+            Log.d(LOG_TAG, "...%%% CONTENT NO CHANGE, NO NEED TO TOUCH SQLITE");
+            return;
+        }
+
+        //
+        oldRaw=raw;
+
+        //
+
+        updateSQLite(raw);
+        Log.d(LOG_TAG, "...*** GOING TO INFORM UI TO POPULATE SPINNER");
+
 
     }
-    private void fetchCloudData() {
+    private String fetchCloudData() {
+        String result=null;
         Log.d(LOG_TAG, "Starting sync");
         //  String locationQuery = Utility.getPreferredLocation(getContext());
 
@@ -65,7 +80,7 @@ public class MyService extends IntentService {
             StringBuffer buffer = new StringBuffer();
             if (inputStream == null) {
                 // Nothing to do.
-                return;
+                return null;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -79,12 +94,13 @@ public class MyService extends IntentService {
 
             if (buffer.length() == 0) {
                 // Stream was empty.  No point in parsing.
-                return;
+                return null;
             }
-            forecastJsonStr = buffer.toString();
-            updateSQLite(buffer.toString());
+          //  forecastJsonStr = buffer.toString();
+          //  updateSQLite(buffer.toString());
             //    getWeatherDataFromJson(forecastJsonStr, locationQuery);
-            Log.d(LOG_TAG, forecastJsonStr);
+            Log.d(LOG_TAG, "...going to return result as "+ buffer.toString());
+            result= buffer.toString();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attempting
@@ -104,7 +120,7 @@ public class MyService extends IntentService {
                 }
             }
         }
-        return;
+        return result;
     }
 
     private void updateSQLite(String str) {
@@ -132,7 +148,7 @@ public class MyService extends IntentService {
                 String grp = jsonObject.getString(MembersProvider.COLUMN_GRP);
 
 
-                Log.d(LOG_TAG, "memberid,username => " + memberid + "," + username);
+                Log.d(LOG_TAG, "===> " + memberid + "," + username+ "," + nickname+ "," + email+ "," + grp);
                 ContentValues values = new ContentValues();
 
                 values.put(MembersProvider.COLUMN_MEMBERID, memberid);
