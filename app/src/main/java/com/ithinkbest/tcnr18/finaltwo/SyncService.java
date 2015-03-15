@@ -22,10 +22,10 @@ import java.net.URL;
  */
 //public class MyService {
 //}
-public class MyService extends IntentService {
+public class SyncService extends IntentService {
     public final static String LOG_TAG = "markchen987";
     static String oldRaw="";
-    public MyService() {
+    public SyncService() {
         super("MyService");
     }
 
